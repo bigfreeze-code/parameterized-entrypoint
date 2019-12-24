@@ -2,12 +2,14 @@
 # -*- coding: utf-8 -*-
 
 import argparse
-from collections import Hashable
+from collections.abc import Hashable
 import json
 import os
 import subprocess
 import sys
 import traceback
+from time import perf_counter, sleep
+from socket import create_connection
 
 from jinja2 import BaseLoader, Environment, FileSystemLoader, StrictUndefined, \
         Template, UndefinedError
@@ -37,6 +39,21 @@ def process_templates(vars, options):
             with open(output_file, 'w') as out:
                 out.write(output)
 
+
+def wait_for(vars, options):
+    if not options.waitfor:
+      return
+    host, port = options.waitfor.split(':')
+    start_time = perf_counter()
+    while True:
+        try:
+            with create_connection((host, port), timeout=int(options.waitfor_timeout)):
+                break
+        except OSError as ex:
+            sleep(1)
+            if perf_counter() - start_time >= options.waitfor_timeout:
+                raise TimeoutError('Waited too long for the port {} on host {} to start accepting '
+                                   'connections.'.format(port, host)) from ex
 
 def run_scripts(vars, options):
     try:
@@ -142,6 +159,12 @@ def parse_args(args=None):
             description='Render a directory hierarchy '
                 'of templates and execute a command.',
             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('-w', '--waitfor', metavar='VARIABLES',
+            dest='waitfor', default=False,
+            help='Wait for TCP Socket before proceeding')
+    parser.add_argument('-x', '--waitfor-timeout', metavar='VARIABLES',
+            dest='waitfor_timeout', default=60,
+            help='Wait for TCP Socket timeout in seconds')
     parser.add_argument('-v', '--variables', metavar='VARIABLES',
             dest='variables_file', default='/variables.yml',
             help='optional YAML file containing template variables')
@@ -166,6 +189,9 @@ def parse_args(args=None):
         TEMPLATES/some/file.txt will be rendered as OUTPUT/some/file.txt.)
 
         Then, any executable script in the SCRIPTS directory are run.
+
+        Then, if any WAITFOR is defined, entrypoint will wait for a tcp socket to open. 
+        if it does not succed in the given timeout the entrypoint will fail
 
         Finally, the COMMAND is executed. Template variables can also be used in
         the command and its arguments. Add '--' before the command if any ARGS
@@ -202,6 +228,7 @@ def main():
             vars = collect_vars(options)
             process_templates(vars, options)
             run_scripts(vars, options)
+            wait_for(vars, options)
         else:
             sys.stderr.write('SKIP_ENTRYPOINT is set, skipping entrypoint\n')
             vars = {}
