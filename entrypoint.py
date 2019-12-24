@@ -190,6 +190,9 @@ def parse_args(args=None):
 
         Then, any executable script in the SCRIPTS directory are run.
 
+        Then, if any WAITFOR is defined, entrypoint will wait for a tcp socket to open. 
+        if it does not succed in the given timeout the entrypoint will fail
+
         Finally, the COMMAND is executed. Template variables can also be used in
         the command and its arguments. Add '--' before the command if any ARGS
         start with '-'.
