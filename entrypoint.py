@@ -40,7 +40,7 @@ def process_templates(vars, options):
                 out.write(output)
 
 
-def wait_for(vars, options):
+def wait_for(options):
     if not options.waitfor:
       return
     host, port = options.waitfor.split(':')
@@ -78,12 +78,18 @@ def exec_command(vars, options):
 
 
 def collect_vars(options):
-    if os.path.exists(options.variables_file):
-        with open(options.variables_file) as stream:
+    if os.path.exists(options.default_variables_file):
+        with open(options.default_variables_file) as default_stream:
             vars = yaml.safe_load(stream) or {}
     else:
         vars = {}
+
+    if os.path.exists(options.variables_file):
+        with open(options.variables_file) as stream:
+            vars.update(yaml.safe_load(stream) or {})
+
     vars.update(os.environ)
+
     return vars
 
 
@@ -168,6 +174,9 @@ def parse_args(args=None):
     parser.add_argument('-v', '--variables', metavar='VARIABLES',
             dest='variables_file', default='/variables.yml',
             help='optional YAML file containing template variables')
+    parser.add_argument('--default_variables', metavar='VARIABLES',
+            dest='default_variables_file', default='/defaults.yml',
+            help='optional YAML file containing default template variables')
     parser.add_argument('-t', '--templates', metavar='TEMPLATES',
             dest='template_root', default='/templates',
             help='directory structure containing template files')
@@ -228,7 +237,7 @@ def main():
             vars = collect_vars(options)
             process_templates(vars, options)
             run_scripts(vars, options)
-            wait_for(vars, options)
+            wait_for(options)
         else:
             sys.stderr.write('SKIP_ENTRYPOINT is set, skipping entrypoint\n')
             vars = {}
