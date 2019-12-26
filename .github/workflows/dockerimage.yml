@@ -23,4 +23,4 @@ jobs:
       with:
         version: latest
     - name: Run Buildx
-      run: pwd && ls -la && docker buildx build --platform linux/amd64,linux/arm/v7,linux/arm64 --output "type=image,push=false" .
+      run: docker buildx build --build-arg DEBIANTAG=buster-slim --platform linux/amd64,linux/arm/v7,linux/arm64 --output "type=image,push=false" .
