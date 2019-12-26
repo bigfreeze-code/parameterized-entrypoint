@@ -22,7 +22,7 @@ jobs:
       with:
         version: latest
     - name: Run Buildx
-      run: docker buildx build --build-arg DEBIANTAG=buster-slim --platform linux/amd64,linux/arm/v7,linux/arm64 --output "type=image,push=false" -t entrypoint .
+      run: docker buildx build --build-arg DEBIANTAG=buster-slim --platform linux/amd64,linux/arm/v7,linux/arm64 --output "type=local,dest=output" -t entrypoint .
     - name: Generate Changelog
       run: echo "# Changelog" > ${{ github.workflow }}-CHANGELOG.txt
     - name: Release
