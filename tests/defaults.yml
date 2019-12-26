@@ -1,0 +1,4 @@
+---
+default1: value1
+default2: value2
+var1: defaults.yml
