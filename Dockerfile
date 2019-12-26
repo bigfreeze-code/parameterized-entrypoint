@@ -1,6 +1,6 @@
 ARG DEBIANTAG                       
                                      
-FROM debian:${DEBIANTAG}
+FROM debian:${DEBIANTAG} as build
                                      
 RUN set -ex \                
   && apt-get update -y \
@@ -20,5 +20,10 @@ RUN set -ex \
   && python3 setup.py build \
   && chmod 755 dist/entrypoint \
   && mv dist/entrypoint /usr/local/bin
+
+
+FROM scratch
+
+COPY --from=build /usr/local/bin/entrypoint /
 
 

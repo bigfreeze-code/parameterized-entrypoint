@@ -5,7 +5,6 @@ on:
     # Sequence of patterns matched against refs/heads
     branches:
       - master         # Push events on master branch
-      - 'releases/**'  # Push events to branches matching refs/heads/releases/10
     # Sequence of patterns matched against refs/tags
     tags:
       - v.*
@@ -24,5 +23,28 @@ jobs:
         version: latest
     - name: Run Buildx
       run: docker buildx build --build-arg DEBIANTAG=buster-slim --platform linux/amd64,linux/arm/v7,linux/arm64 --output "type=image,push=false" -t entrypoint .
-    - name: Check images
-      run: docker images
+    - name: Generate Changelog
+      run: echo "# Changelog" > ${{ github.workflow }}-CHANGELOG.txt
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: |
+          output/linux_arm_v7/entrypoint
+          output/linux_arm64/entrypoint
+          output/linux_amd64/entrypoint
+        body_path: ${{ github.workflow }}-CHANGELOG.txt
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Pre-Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/heads/master')
+      with:
+        files: |
+          output/linux_arm_v7/entrypoint
+          output/linux_arm64/entrypoint
+          output/linux_amd64/entrypoint
+        body_path: ${{ github.workflow }}-CHANGELOG.txt
+        prerelease: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
