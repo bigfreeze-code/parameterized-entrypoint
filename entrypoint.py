@@ -80,7 +80,7 @@ def exec_command(vars, options):
 def collect_vars(options):
     if os.path.exists(options.default_variables_file):
         with open(options.default_variables_file) as default_stream:
-            vars = yaml.safe_load(stream) or {}
+            vars = yaml.safe_load(default_stream) or {}
     else:
         vars = {}
 
