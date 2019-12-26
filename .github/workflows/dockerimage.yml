@@ -36,15 +36,18 @@ jobs:
         body_path: ${{ github.workflow }}-CHANGELOG.txt
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - name: Pre-Release
-      uses: softprops/action-gh-release@v1
-      if: startsWith(github.ref, 'refs/heads/master')
-      with:
-        files: |
-          output/linux_arm_v7/entrypoint
-          output/linux_arm64/entrypoint
-          output/linux_amd64/entrypoint
-        body_path: ${{ github.workflow }}-CHANGELOG.txt
-        prerelease: true
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+        
+        #Error : GitHub Releases requires a tag ??
+        #    - name: Pre-Release
+        #      uses: softprops/action-gh-release@v1
+        #      if: startsWith(github.ref, 'refs/heads/master')
+        #      with:
+        #        files: |
+        #          output/linux_arm_v7/entrypoint
+        #          output/linux_arm64/entrypoint
+        #          output/linux_amd64/entrypoint
+        #        body_path: ${{ github.workflow }}-CHANGELOG.txt
+        #        prerelease: true
+        #      env:
+        #        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
