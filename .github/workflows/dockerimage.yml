@@ -36,9 +36,7 @@ jobs:
         rm -rf output/linux_arm_v7 output/linux_arm64 output/linux_amd64
     - name: Tests
       run: |
-         cp /lib/x86_64-linux-gnu/ld-linux-x86-64.so.2 /lib64/ld-linux-x86-64.so.2
-         cd tests
-         ../output/entrypoint_amd64 --default_variables `pwd`/defaults.yml --variables `pwd`/variables.yml --templates `pwd`/templates --scripts `pwd`/scripts -- echo "cmdline test" >> /tmp/cmdline 
+         docker run --rm -t -i -v `pwd`:/work -v /tmp:/tmp  debian:buster-slim "cd /work/tests && ../output/entrypoint_amd64 --default_variables `pwd`/defaults.yml --variables `pwd`/variables.yml --templates `pwd`/templates --scripts `pwd`/scripts -- echo \"cmdline test\" >> /tmp/cmdline"
          sha256sum -c test.sums
     - name: Release
       uses: softprops/action-gh-release@v1
