@@ -36,8 +36,8 @@ jobs:
         rm -rf output/linux_arm_v7 output/linux_arm64 output/linux_amd64
     - name: Tests
       run: |
-         ldd output/entrypoint_amd64
-         ls -la /
+         ls -la /lib/
+         ls -la /lib64/
          cd tests
          ../output/entrypoint_amd64 --default_variables `pwd`/defaults.yml --variables `pwd`/variables.yml --templates `pwd`/templates --scripts `pwd`/scripts -- echo "cmdline test" >> /tmp/cmdline 
          sha256sum -c test.sums
